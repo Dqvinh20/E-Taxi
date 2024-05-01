@@ -1,16 +1,24 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:grab_clone/api/CustomerService.dart';
 import 'package:grab_clone/api/SocketApi.dart';
 import 'package:grab_clone/constants.dart';
 import 'package:grab_clone/models/Booking.dart';
+import 'package:grab_clone/models/Customer.dart';
+import 'package:grab_clone/models/TopAddress.dart';
+import 'package:grab_clone/models/TopHistory.dart';
 import 'package:grab_clone/screens/book/driver_tracking.dart';
 import 'package:grab_clone/widgets/location_list_item.dart';
 import 'package:grab_clone/widgets/vehicle_chosen_button.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:relative_time/relative_time.dart';
+import 'package:nb_utils/nb_utils.dart' as nb_utils;
 
 import '../../helpers/helper.dart';
 import '../../models/BookingStatus.dart';
@@ -35,36 +43,49 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isLoading = true;
   List<Location> items = [];
-  List<Location> locations = [
-    Location(
-      name: "Location 1",
-      address: "Address 1",
-    ),
-    Location(
-      name: "Location 2",
-      address: "Address 2",
-    ),
-    Location(
-      name: "Location 3",
-      address: "Address 3",
-    ),
-    Location(
-      name: "Location 4",
-      address: "Address 4",
-    ),
-    Location(
-      name: "Location 5",
-      address:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin fringilla elit id lacinia consectetur. Vivamus tempor tellus vitae purus feugiat, non lacinia velit feugiat. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Cras ultricies semper arcu. Nulla sed velit pretium, posuere arcu id, porta turpis. Maecenas dapibus turpis ut magna facilisis, nec consequat neque ",
-    ),
-  ];
+
+  Future<List<TopAddress>> _getTop5Address() async {
+    var myInfo = await getStoredData();
+    final user = myInfo["user"] as CustomerModel;
+
+    final res = await CustomerService.getTop5Address(user.phoneNumber ?? "");
+    if (res.statusCode == 200) {
+      try {
+        List jsonRes = json.decode(res.body);
+        var data = jsonRes.map((data) => TopAddress.fromMap(data)).toList();
+        return data;
+      } catch (e) {
+        return [];
+      }
+    } else {
+      throw Exception("Error");
+    }
+  }
+
+  Future<List<BookingModel>> _getTopHistory() async {
+    var myInfo = await getStoredData();
+    final user = myInfo["user"] as CustomerModel;
+
+    final res = await CustomerService.getHistory(user.phoneNumber ?? "");
+
+    if (res.statusCode == 200) {
+      List jsonRes = json.decode(res.body);
+      try {
+        var data = jsonRes.map((data) => BookingModel.fromMap(data)).toList();
+        return data;
+      } catch (e) {
+        return [];
+      }
+    } else {
+      throw Exception("Error");
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     Future.delayed(const Duration(seconds: 1), () {
       setState(() {
-        items = locations;
         isLoading = false;
       });
     });
@@ -77,9 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final navigator = Navigator.of(context);
+  Widget build(BuildContext parentContext) {
+    final theme = Theme.of(parentContext);
+    final navigator = Navigator.of(parentContext);
 
     return Scaffold(
       body: Stack(
@@ -88,8 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Container(
                 color: theme.primaryColor.withOpacity(.7),
-                height: MediaQuery.of(context).size.height * 0.22,
-                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(parentContext).size.height * 0.22,
+                width: MediaQuery.of(parentContext).size.width,
                 child: Padding(
                     padding: const EdgeInsets.only(
                         top: kToolbarHeight,
@@ -138,44 +159,309 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SingleChildScrollView(
                   child: Column(children: [
                     Container(
-                      height: MediaQuery.of(context).size.height * 0.5,
-                      child: isLoading
-                          ? ListView.separated(
-                              padding: EdgeInsets.zero,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: 5,
-                              itemBuilder: (_, i) {
-                                return Shimmer.fromColors(
-                                  baseColor: baseLoadingColor,
-                                  highlightColor: highlightLoadingColor,
-                                  child: const SkeletonLocationListItem(),
+                        height: MediaQuery.of(parentContext).size.height * 0.5,
+                        child: FutureBuilder<List<BookingModel>>(
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return ListView.separated(
+                                  padding: EdgeInsets.zero,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: 5,
+                                  itemBuilder: (_, i) {
+                                    return Shimmer.fromColors(
+                                      baseColor: baseLoadingColor,
+                                      highlightColor: highlightLoadingColor,
+                                      child: const SkeletonLocationListItem(),
+                                    );
+                                  },
+                                  separatorBuilder: (_, __) => Container(
+                                    height: 1,
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: layoutMedium),
+                                    color: Colors.grey.withOpacity(.4),
+                                  ),
                                 );
-                              },
-                              separatorBuilder: (_, __) => Container(
-                                height: 1,
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: layoutMedium),
-                                color: Colors.grey.withOpacity(.4),
-                              ),
-                            )
-                          : ListView.separated(
-                              padding: EdgeInsets.zero,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: 5,
-                              itemBuilder: (_, i) {
-                                return LocationListItem(
-                                    onTap: () => {debugPrint(items[i].name)},
-                                    title: items[i].name,
-                                    subtitle: items[i].address);
-                              },
-                              separatorBuilder: (_, __) => Container(
-                                height: 1,
-                                margin: const EdgeInsets.symmetric(
-                                    horizontal: layoutMedium),
-                                color: Colors.grey.withOpacity(.4),
-                              ),
-                            ),
-                    ),
+                              }
+
+                              var history = snapshot.data;
+                              if (snapshot.hasData) {
+                                if (history!.isEmpty) {
+                                  return Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        vertical: 20),
+                                    child: const Text(
+                                      "Chưa có lịch sử chuyến đi",
+                                      style: TextStyle(fontSize: 20),
+                                    ),
+                                  );
+                                } else {
+                                  return ListView.separated(
+                                    padding: EdgeInsets.zero,
+                                    physics:
+                                        const NeverScrollableScrollPhysics(),
+                                    itemCount:
+                                        history.length > 5 ? 5 : history.length,
+                                    itemBuilder: (_, i) {
+                                      if (history[i].updatedAt == null) {
+                                        return Container();
+                                      }
+
+                                      var f = NumberFormat.currency(
+                                          locale: "vi_VN");
+                                      var outputFormat =
+                                          DateFormat('hh:mm dd/MM/yyyy');
+                                      return LocationListItem(
+                                          onTap: () {
+                                            var driver = history[i].driver;
+                                            nb_utils.showBottomSheetOrDialog(
+                                                context: context,
+                                                child: Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 8,
+                                                        horizontal: 16),
+                                                    width:
+                                                        MediaQuery.of(context)
+                                                            .size
+                                                            .width,
+                                                    child: Column(children: [
+                                                      Text(
+                                                        "Thông tin chi tiết",
+                                                        style: nb_utils
+                                                            .primaryTextStyle(
+                                                                size: 16,
+                                                                weight: nb_utils
+                                                                    .fontWeightBoldGlobal),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 4,
+                                                      ),
+                                                      const Divider(
+                                                        height: 2,
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 4,
+                                                      ),
+                                                      Container(
+                                                        child: Column(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .start,
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Số điện thoại tài xế",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  Text(
+                                                                    driver!
+                                                                        .phoneNumber!,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Tên tài xế",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  Text(
+                                                                    driver!
+                                                                        .fullName!,
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Loại xe",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  Builder(builder:
+                                                                      (context) {
+                                                                    const vehicleTypeMap =
+                                                                        {
+                                                                      "2":
+                                                                          "Xe máy",
+                                                                      "4":
+                                                                          "Xe 4 chỗ",
+                                                                      "7":
+                                                                          "Xe 7 chỗ"
+                                                                    };
+
+                                                                    return Text(
+                                                                        vehicleTypeMap[
+                                                                            driver.vehicleType!]!);
+                                                                  }),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Điểm đón",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  nb_utils
+                                                                      .ReadMoreText(
+                                                                    history[i]
+                                                                            ?.pickupAddrFull ??
+                                                                        "",
+                                                                    trimLength:
+                                                                        30,
+                                                                    trimCollapsedText:
+                                                                        " ... đọc thêm",
+                                                                    trimExpandedText:
+                                                                        " thu gọn",
+                                                                    colorClickableText:
+                                                                        Colors
+                                                                            .grey
+                                                                            .shade500,
+                                                                    trimLines:
+                                                                        2,
+                                                                    trimMode: nb_utils
+                                                                        .TrimMode
+                                                                        .Line,
+                                                                  ).flexible(),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Điểm đến",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  nb_utils
+                                                                      .ReadMoreText(
+                                                                    history[i]
+                                                                            ?.destAddrFull ??
+                                                                        "",
+                                                                    trimLength:
+                                                                        30,
+                                                                    trimCollapsedText:
+                                                                        " ... đọc thêm",
+                                                                    trimExpandedText:
+                                                                        " thu gọn",
+                                                                    colorClickableText:
+                                                                        Colors
+                                                                            .grey
+                                                                            .shade500,
+                                                                    trimLines:
+                                                                        2,
+                                                                    trimMode: nb_utils
+                                                                        .TrimMode
+                                                                        .Line,
+                                                                  ).flexible(),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Khoảng cách",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  nb_utils
+                                                                      .ReadMoreText(
+                                                                    "${history[i]?.distance!} km",
+                                                                    trimLength:
+                                                                        30,
+                                                                    trimCollapsedText:
+                                                                        " ... đọc thêm",
+                                                                    trimExpandedText:
+                                                                        " thu gọn",
+                                                                    colorClickableText:
+                                                                        Colors
+                                                                            .grey
+                                                                            .shade500,
+                                                                    trimLines:
+                                                                        2,
+                                                                    trimMode: nb_utils
+                                                                        .TrimMode
+                                                                        .Line,
+                                                                  ).flexible(),
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Giá: ",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  Text(f.format(
+                                                                          double.parse(
+                                                                              history[i].price!)))
+                                                                      .flexible()
+                                                                ],
+                                                              ),
+                                                              Row(
+                                                                children: [
+                                                                  Text(
+                                                                    "Ngày đặt xe: ",
+                                                                    style: nb_utils
+                                                                        .boldTextStyle(),
+                                                                  ).expand(),
+                                                                  Text(outputFormat.format(history[
+                                                                              i]
+                                                                          .updatedAt!
+                                                                          .toLocal()))
+                                                                      .flexible()
+                                                                ],
+                                                              ),
+                                                            ]),
+                                                      )
+                                                    ])),
+                                                bottomSheetDialog: nb_utils
+                                                    .BottomSheetDialog
+                                                    .BottomSheet);
+                                          },
+                                          title: history[i].destAddrFull!,
+                                          subtitle: history[i]
+                                              .updatedAt!
+                                              .relativeTimeLocale(
+                                                  const Locale('vi')));
+                                    },
+                                    separatorBuilder: (_, __) => Container(
+                                      height: 1,
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: layoutMedium),
+                                      color: Colors.grey.withOpacity(.4),
+                                    ),
+                                  );
+                                }
+                              }
+
+                              return Container();
+                            },
+                            future: _getTopHistory())),
                     const SizedBox(height: layoutMedium),
                   ]),
                 ),
@@ -183,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           Positioned(
-            top: MediaQuery.of(context).size.height * 0.22 -
+            top: MediaQuery.of(parentContext).size.height * 0.22 -
                 (kToolbarHeight + layoutMedium) / 2,
             left: layoutMedium,
             right: layoutMedium,

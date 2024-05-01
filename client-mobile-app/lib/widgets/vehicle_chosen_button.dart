@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:grab_clone/api/GeoService.dart';
 import 'package:grab_clone/helpers/helper.dart';
 import 'package:grab_clone/screens/book/book_ride.dart';
 
@@ -76,12 +78,18 @@ class _VehicleChosenButtonState extends State<VehicleChosenButton> {
                   );
                 }));
             if (destGeoPoint != null) {
+              final res = await GeoService.reverseGeocode(
+                  destGeoPoint.latitude, destGeoPoint.longitude);
+              var data = jsonDecode(res.body);
+              var formattedDestAddr = data[0]["formattedAddress"] ??
+                  "${destGeoPoint.latitude}, ${destGeoPoint.longitude}";
               navigator.push(PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
                       BookRideScreen(
                         vehicleType: widget.vehicleType,
                         destGeoPoint: destGeoPoint,
                         pickUpGeoPoint: pickUpGeoPoint,
+                        formattedDestAddr: formattedDestAddr,
                       ),
                   transitionDuration: shortDuration,
                   transitionsBuilder:

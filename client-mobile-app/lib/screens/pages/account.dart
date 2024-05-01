@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:grab_clone/api/AuthService.dart';
+import 'package:grab_clone/widgets/ProfileMenuWidget.dart';
 import '../../constants.dart';
 import '../../helpers/helper.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 import '../../models/Customer.dart';
 import '../auth/login.dart';
@@ -18,110 +20,132 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var iconColor = Theme.of(context).primaryColor;
+
     Widget _body = FutureBuilder(
         future: getStoredData(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             user = snapshot.data?["user"] as CustomerModel;
-            return Container(
-                margin:
-                    EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: layoutMedium,
-                      right: layoutMedium,
-                      top: layoutSmall),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(children: [
-                        GestureDetector(
-                          onTap: () {
-                            debugPrint("edit profile");
-                          },
-                          child: Container(
-                              padding: EdgeInsets.zero,
-                              child: Stack(
-                                children: [
-                                  const Icon(
-                                    Icons.account_circle_outlined,
-                                    size: 100,
-                                    color: Colors.orange,
-                                  ),
-                                  Positioned(
-                                    right: 8,
-                                    bottom: 10,
-                                    height: 32,
-                                    width: 32,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withOpacity(.2),
-                                            spreadRadius: 0,
-                                            blurRadius: 5,
-                                            offset: const Offset(4, 3),
-                                          ),
-                                        ],
-                                      ),
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.edit,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              )),
-                        ),
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.only(left: layoutMedium),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    user.fullName == null
-                                        ? "Nguyễn Văn A"
-                                        : user.fullName!,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall!
-                                        .copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                  ),
-                                ),
-                              ],
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    left: layoutMedium, right: layoutMedium, top: layoutSmall),
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 50,
+                    ),
+
+                    /// -- IMAGE
+                    GestureDetector(
+                      onTap: () {
+                        debugPrint("edit profile");
+                      },
+                      child: Container(
+                        padding: EdgeInsets.zero,
+                        child: Stack(
+                          children: [
+                            SizedBox(
+                              width: 120,
+                              height: 120,
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: const Image(
+                                    image:
+                                        AssetImage("assets/images/profile.png"),
+                                  )),
                             ),
-                          ),
-                        )
-                      ]),
-                      const SizedBox(
-                        height: layoutMedium,
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                width: 35,
+                                height: 35,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(100),
+                                    color: Colors.white,
+                                    border: Border.all(color: iconColor)),
+                                child: const Icon(
+                                  LineAwesomeIcons.alternate_pencil,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Text("Số điện thoại: ${user.phoneNumber}"),
-                      ElevatedButton(
-                          onPressed: () async {
-                            try {
-                              await AuthService.logout();
-                              await clearCredential();
-                              await Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const LoginScreen()));
-                            } catch (e) {}
-                          },
-                          child: Text("Đăng xuất")),
-                    ],
-                  ),
-                ));
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      user.fullName == null ? "Nguyễn Văn A" : user.fullName!,
+                      style:
+                          Theme.of(context).textTheme.headlineSmall!.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    /// -- BUTTON
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).primaryColor,
+                            side: BorderSide.none,
+                            shape: const StadiumBorder()),
+                        child: const Text("Chỉnh sửa",
+                            style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+                    const Divider(),
+                    const SizedBox(height: 10),
+
+                    /// -- MENU
+                    ProfileMenuWidget(
+                      title: "${user.phoneNumber}",
+                      icon: Icon(
+                        LineAwesomeIcons.phone,
+                        color: iconColor,
+                      ),
+                    ),
+                    const Divider(),
+                    ProfileMenuWidget(
+                      title: "Cài đặt",
+                      icon: Icon(
+                        LineAwesomeIcons.cog,
+                        color: iconColor,
+                      ),
+                      endIcon: true,
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        try {
+                          await AuthService.logout();
+                          await clearCredential();
+                          await Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()));
+                        } catch (e) {}
+                      },
+                      child: ProfileMenuWidget(
+                        title: "Đăng xuất",
+                        icon: Icon(
+                          LineAwesomeIcons.alternate_sign_out,
+                          color: iconColor,
+                        ),
+                        textColor: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           return const Center(
             child: CircularProgressIndicator(),

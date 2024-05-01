@@ -28,7 +28,7 @@ const ApiCustomerService = {
 					maxAge: 3600,
 				},
 
-				whitelist: ["customers.*", "geo.*", "$node.*", "apiCustomer.*"],
+				whitelist: ["customers.*", "geo.*", "$node.*", "apiCustomer.*", "bookingSystem.*"],
 
 				mergeParams: true,
 

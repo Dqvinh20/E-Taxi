@@ -6,6 +6,8 @@ import 'package:grab_eat_ui/models/Driver.dart';
 import 'package:grab_eat_ui/pages/auth/login.dart';
 import 'package:grab_eat_ui/widgets/ProfileMenuWidget.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 
 import '../utils/helper.dart';
 
@@ -18,6 +20,13 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   late DriverModel user;
+  late Socket _socket;
+
+  @override
+  void initState() {
+    super.initState();
+    _socket = SocketApi().ins;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +51,7 @@ class _AccountScreenState extends State<AccountScreen> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             user = snapshot.data?["user"] as DriverModel;
+            print(user.driverStatus);
             return SingleChildScrollView(
               child: Container(
                 padding: const EdgeInsets.all(20.0),
@@ -147,7 +157,26 @@ class _AccountScreenState extends State<AccountScreen> {
                       );
                     }),
                     const Divider(),
-                    const SizedBox(height: 10),
+                    ProfileMenuWidget(
+                        title: "Bật chế độ nghỉ",
+                        icon: Icon(
+                          LineAwesomeIcons.cog,
+                          color: iconColor,
+                        ),
+                        endAction: Builder(builder: (context) {
+                          return GFToggle(
+                            onChanged: (val) {
+                              _socket.emit("call", [
+                                val == true
+                                    ? SocketEvent.DRIVER_INACTIVE
+                                    : SocketEvent.DRIVER_ACTIVE
+                              ]);
+                            },
+                            value: user.driverStatus == "INACTIVE",
+                            type: GFToggleType.ios,
+                            duration: Duration(microseconds: 100),
+                          );
+                        })),
                     ProfileMenuWidget(
                       title: "Cài đặt",
                       icon: Icon(

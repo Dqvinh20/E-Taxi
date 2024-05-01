@@ -20,12 +20,14 @@ class BookRideScreen extends StatefulWidget {
   final GeoPoint pickUpGeoPoint;
   final GeoPoint destGeoPoint;
   final String vehicleType;
+  final String formattedDestAddr;
 
   const BookRideScreen(
       {super.key,
       required this.pickUpGeoPoint,
       required this.destGeoPoint,
-      required this.vehicleType});
+      required this.vehicleType,
+      required this.formattedDestAddr});
 
   @override
   State<BookRideScreen> createState() => _BookRideScreenState();
@@ -63,6 +65,7 @@ class _BookRideScreenState extends State<BookRideScreen> with OSMMixinObserver {
     // Init booking
     _booking = BookingModel(
       vehicleType: widget.vehicleType,
+      destAddrFull: widget.formattedDestAddr,
       pickupAddr: AddressModel(
         lat: widget.pickUpGeoPoint.latitude,
         lon: widget.pickUpGeoPoint.longitude,
@@ -266,8 +269,13 @@ class _BookRideScreenState extends State<BookRideScreen> with OSMMixinObserver {
         dismissOnTap: false);
 
     try {
+      _booking.pickupAddrFull = await getPickupAddress();
+      // _booking.destAddrFull = await get
+
       final res = await CustomerService.bookRide(_booking);
       if (res.statusCode == 200) {
+        log("bookRide");
+
         _startFailTimer();
       } else {
         EasyLoading.showError("Đặt xe thất bại");
@@ -278,6 +286,7 @@ class _BookRideScreenState extends State<BookRideScreen> with OSMMixinObserver {
   }
 
   void _onDriverAccepted(dynamic data) async {
+    log("ACCEPT");
     log(data.toString(), name: "Book Ride");
 
     _socket.ins.off("driver_accepted");
@@ -409,6 +418,7 @@ class _BookRideScreenState extends State<BookRideScreen> with OSMMixinObserver {
         await EasyLoading.showError("Lỗi tính giá");
         _navigator.pop();
       }
+      log("Setup socket");
       _socket.ins.on("driver_accepted", _onDriverAccepted);
       _socket.ins.on("booking_updated", _onBookingUpdated);
     }

@@ -62,7 +62,7 @@ class _RootAppState extends State<RootApp> {
       "assets/images/inbox_icon.svg",
       "assets/images/account_icon.svg"
     ];
-    List textItems = ["Trang chủ", "Ví", "Inbox", "Tài khoản"];
+    List textItems = ["Trang chủ", "Lịch sử", "Inbox", "Tài khoản"];
     return BottomNavigationBar(
         iconSize: 48,
         unselectedFontSize: 13.0,

@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <application
         android:name="${applicationName}"
-        android:label="grab_eat_ui"
+         android:label="E-Taxi Driver"
         android:usesCleartextTraffic="true"
         >
         <activity

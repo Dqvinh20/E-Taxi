@@ -115,11 +115,15 @@ class _LoginScreenState extends State<LoginScreen> {
       if (res.statusCode == 422) {
         EasyLoading.dismiss();
         var error = jsonDecode(res.body);
+        print(error);
         if (error["message"] == "Your phone number is not verified!") {
           navigator.push(MaterialPageRoute(
               builder: (context) => VerifyOtpScreen(
                     phoneNumber: phoneNumber,
                   )));
+        } else if (error["message"] == "Your account is logged!") {
+          EasyLoading.showError("Tài khoản đã đăng nhập trên thiết bị khác",
+              maskType: EasyLoadingMaskType.black, dismissOnTap: true);
         } else {
           EasyLoading.showError("Số điện thoại hoặc mật khẩu không đúng",
               maskType: EasyLoadingMaskType.black, dismissOnTap: true);
@@ -155,8 +159,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(50),
-                    topRight: Radius.circular(50),
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
                   ),
                 ),
                 child: Column(
@@ -241,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             width: size.width * 0.8,
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(29),
+                              borderRadius: BorderRadius.circular(16),
                               child: ElevatedButton(
                                 child: Text(
                                   "Đăng nhập",
@@ -257,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ? login
                                         : null,
                                 style: ElevatedButton.styleFrom(
-                                    primary: primary,
+                                    backgroundColor: primary,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 40, vertical: 20),
                                     textStyle: TextStyle(

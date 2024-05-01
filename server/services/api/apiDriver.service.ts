@@ -39,7 +39,7 @@ const ApiDriverService = {
 			{
 				path: "/api/v1",
 
-				whitelist: ["drivers.*", "$node.*", "apiDriver.*"],
+				whitelist: ["drivers.*", "$node.*", "apiDriver.*", "bookingSystem.*"],
 
 				mergeParams: true,
 

@@ -2,7 +2,7 @@
     package="com.ktpm1.grab_clone">
    <application
         android:usesCleartextTraffic="true" 
-        android:label="E-Taxi"
+        android:label="E-Taxi Customer"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

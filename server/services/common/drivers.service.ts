@@ -180,6 +180,49 @@ const DriversService: DriversServiceSchema = {
 		find: {
 			cache: false,
 		},
+
+		active: {
+			params: {},
+			async handler(this: DriversThis, ctx: Context<any>) {
+				const { user } = ctx.meta as any;
+
+				const driver = await ctx.call<IDriver, any>("drivers.get", {
+					id: user._id,
+				});
+				if (driver.driverStatus === DriverStatus.INACTIVE) {
+					await ctx.emit("drivers.updateStatus", {
+						id: user._id,
+						driverStatus: DriverStatus.ACTIVE,
+					});
+				}
+			},
+		},
+
+		history: {
+			rest: "GET /history",
+			async handler(this: DriversThis, ctx: Context<any>) {
+				const data = await ctx.call<IDriver, any>("bookingSystem.getDriverHistory", {});
+				this.logger.info(data);
+				return data;
+			},
+		},
+
+		inactive: {
+			params: {},
+			async handler(this: DriversThis, ctx: Context<any>) {
+				const { user } = ctx.meta as any;
+
+				const driver = await ctx.call<IDriver, any>("drivers.get", {
+					id: user._id,
+				});
+				if (driver.driverStatus === DriverStatus.ACTIVE) {
+					await ctx.emit("drivers.updateStatus", {
+						id: user._id,
+						driverStatus: DriverStatus.INACTIVE,
+					});
+				}
+			},
+		},
 	},
 
 	methods: {

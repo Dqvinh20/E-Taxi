@@ -2,23 +2,23 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class ApiConstants {
-  static bool isDev = false;
+  static bool isDev = true;
 
   // Local
   static String host = '10.0.2.2';
   static int port = 3001;
 
   // Remote
-  static String remoteHost = "hausuper-s.me";
+  static String remoteHost = "api-customer.hausuper-s.me";
   static int remotePort = 4001;
 
   // Url
   static String baseUrl = isDev ? 'http://$host:$port/api/v1' : prodUrl;
-  static String prodUrl = 'http://$remoteHost:$remotePort/api/v1';
+  static String prodUrl = 'http://$remoteHost/api/v1';
 
   static String socketUrl = isDev
       ? 'http://$host:3003/customers'
-      : "http://$remoteHost:4003/customers";
+      : "https://socket.hausuper-s.me/customer";
 }
 
 const topMarginInWelcomeScreen = 150.0;

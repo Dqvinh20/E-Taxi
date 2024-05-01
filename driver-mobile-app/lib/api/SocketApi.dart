@@ -13,6 +13,9 @@ class SocketEvent {
   static const String DRIVER_ACCEPT = "bookingSystem.driverAccept";
 
   static const String DRIVER_FINISH = "bookingSystem.driverFinish";
+
+  static const String DRIVER_ACTIVE = "drivers.active";
+  static const String DRIVER_INACTIVE = "drivers.inactive";
 }
 
 class SocketApi {

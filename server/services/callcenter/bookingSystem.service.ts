@@ -31,6 +31,8 @@ const BookingService: ServiceSchema = {
 			"inApp",
 			"createdAt",
 			"updatedAt",
+			"pickupAddrFull",
+			"destAddrFull",
 		],
 
 		populates: {
@@ -484,6 +486,90 @@ const BookingService: ServiceSchema = {
 				}
 			},
 		},
+
+		getDriverHistory: {
+			cache: false,
+			async handler(this: Service, ctx: any) {
+				const { user } = ctx.meta;
+				const driverId = user._id;
+
+				const data = await this.adapter.collection.aggregate([
+					{
+						$match: {
+							driverId: new MongoObjectId(driverId),
+							inApp: true,
+							status: "DONE",
+							pickupAddrFull: { $exists: true },
+						},
+					},
+					{
+						$lookup: {
+							from: "drivers",
+							localField: "driverId",
+							foreignField: "_id",
+							as: "driver",
+						},
+					},
+					{ $unwind: "$driver" },
+					{
+						$lookup: {
+							from: "address",
+							localField: "destAddr",
+							foreignField: "_id",
+							as: "destAddr",
+						},
+					},
+					{ $unwind: "$destAddr" },
+					{
+						$lookup: {
+							from: "address",
+							localField: "pickupAddr",
+							foreignField: "_id",
+							as: "pickupAddr",
+						},
+					},
+					{ $unwind: "$pickupAddr" },
+					{
+						$lookup: {
+							from: "customers",
+							localField: "customerId",
+							foreignField: "_id",
+							as: "customer",
+						},
+					},
+					{ $unwind: "$customer" },
+					{
+						$group: {
+							_id: {
+								$dateToString: { format: "%Y-%m-%d", date: "$updatedAt" },
+							},
+							count: { $count: {} },
+							bookings: {
+								$push: "$$ROOT",
+							},
+							totalEarning: {
+								$sum: {
+									$toDouble: "$price",
+								},
+							},
+						},
+					},
+					{
+						$sort: { _id: -1 },
+					},
+					{
+						$set: {
+							bookingDate: "$_id",
+							_id: "$$REMOVE",
+						},
+					},
+				]);
+
+				const result = await data.toArray();
+
+				return result;
+			},
+		},
 		// -----------------------------
 
 		// Done
@@ -494,6 +580,8 @@ const BookingService: ServiceSchema = {
 				vehicleType: "string",
 				pickupAddr: "object", // Dia chi nay da co lat lon ko can phan giai
 				destAddr: "object", // Dia chi nay da co lat lon ko can phan giai
+				pickupAddrFull: "string",
+				destAddrFull: "string",
 			},
 			async handler(this: Service, ctx: any) {
 				const result = await this.createNew({ ...ctx.params, inApp: true });
@@ -599,8 +687,13 @@ const BookingService: ServiceSchema = {
 			async handler(this: Service, ctx: any): Promise<any> {
 				const { phoneNumber } = ctx.params;
 				const data = await this.actions.find({
-					query: { phoneNumber, inApp: undefined },
-					populate: ["pickupAddr", "destAddr"],
+					query: {
+						phoneNumber,
+						inApp: true,
+						status: "DONE",
+						pickupAddrFull: { $exists: true },
+					},
+					populate: ["pickupAddr", "destAddr", "driver"],
 					sort: "-updatedAt",
 				});
 				return data;

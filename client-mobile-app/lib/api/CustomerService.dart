@@ -6,6 +6,7 @@ import 'ApiClient.dart';
 
 class CustomerService {
   static final String _endpoint = "${ApiConstants.baseUrl}/customers";
+  static final String _bookEndpoint = "${ApiConstants.baseUrl}/booking-system";
   static final ApiClient _client = ApiClient();
 
   static Future<http.Response> bookRide(BookingModel booking) {
@@ -20,5 +21,15 @@ class CustomerService {
       String vehicleType, double distance) {
     return _client.get(Uri.parse(
         "$_endpoint/calculate-price?vehicleType=$vehicleType&distance=$distance"));
+  }
+
+  static Future<http.Response> getTop5Address(String phoneNumber) {
+    return _client.get(Uri.parse("$_bookEndpoint/top-address")
+        .replace(queryParameters: {"phoneNumber": phoneNumber}));
+  }
+
+  static Future<http.Response> getHistory(String phoneNumber) {
+    return _client.get(Uri.parse("$_bookEndpoint/history")
+        .replace(queryParameters: {"phoneNumber": phoneNumber}));
   }
 }

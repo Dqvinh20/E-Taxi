@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 import 'Address.dart';
@@ -13,61 +12,67 @@ class BookingModel {
   String? vehicleType;
   AddressModel? pickupAddr;
   AddressModel? destAddr;
+  String? pickupAddrFull;
+  String? destAddrFull;
   String? status;
   String? price;
   String? distance;
   bool inApp = true;
   DateTime? createdAt;
   DateTime? updatedAt;
-  BookingModel({
-    this.id,
-    this.phoneNumber,
-    this.customerId,
-    this.driverId,
-    this.driver,
-    this.vehicleType,
-    this.pickupAddr,
-    this.destAddr,
-    this.status,
-    this.price,
-    this.distance,
-    this.inApp = true,
-    this.createdAt,
-    this.updatedAt,
-  });
 
-  BookingModel copyWith({
-    String? id,
-    String? phoneNumber,
-    String? customerId,
-    String? driverId,
-    DriverModel? driver,
-    String? vehicleType,
-    AddressModel? pickupAddr,
-    AddressModel? destAddr,
-    String? status,
-    String? price,
-    String? distance,
-    bool? inApp,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
+  BookingModel(
+      {this.id,
+      this.phoneNumber,
+      this.customerId,
+      this.driverId,
+      this.driver,
+      this.vehicleType,
+      this.pickupAddr,
+      this.destAddr,
+      this.status,
+      this.price,
+      this.distance,
+      this.inApp = true,
+      this.createdAt,
+      this.updatedAt,
+      this.destAddrFull,
+      this.pickupAddrFull});
+
+  BookingModel copyWith(
+      {String? id,
+      String? phoneNumber,
+      String? customerId,
+      String? driverId,
+      DriverModel? driver,
+      String? vehicleType,
+      AddressModel? pickupAddr,
+      AddressModel? destAddr,
+      String? status,
+      String? price,
+      String? distance,
+      bool? inApp,
+      DateTime? createdAt,
+      DateTime? updatedAt,
+      String? pickupAddrFull,
+      String? destAddrFull}) {
     return BookingModel(
-      id: id ?? this.id,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      customerId: customerId ?? this.customerId,
-      driverId: driverId ?? this.driverId,
-      driver: driver ?? this.driver,
-      vehicleType: vehicleType ?? this.vehicleType,
-      pickupAddr: pickupAddr ?? this.pickupAddr,
-      destAddr: destAddr ?? this.destAddr,
-      status: status ?? this.status,
-      price: price ?? this.price,
-      distance: distance ?? this.distance,
-      inApp: inApp ?? this.inApp,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
+        id: id ?? this.id,
+        phoneNumber: phoneNumber ?? this.phoneNumber,
+        customerId: customerId ?? this.customerId,
+        driverId: driverId ?? this.driverId,
+        driver: driver ?? this.driver,
+        vehicleType: vehicleType ?? this.vehicleType,
+        pickupAddr: pickupAddr ?? this.pickupAddr,
+        destAddr: destAddr ?? this.destAddr,
+        status: status ?? this.status,
+        price: price ?? this.price,
+        distance: distance ?? this.distance,
+        inApp: inApp ?? this.inApp,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        pickupAddrFull: pickupAddrFull ?? this.pickupAddrFull,
+        destAddrFull: destAddrFull ?? this.destAddrFull);
   }
 
   Map<String, dynamic> toMap() {
@@ -86,6 +91,8 @@ class BookingModel {
       'inApp': inApp,
       'createdAt': createdAt?.toString(),
       'updatedAt': updatedAt?.toString(),
+      'pickupAddrFull': pickupAddrFull,
+      'destAddrFull': destAddrFull,
     };
   }
 
@@ -116,6 +123,11 @@ class BookingModel {
           map['createdAt'] != null ? DateTime.parse(map['createdAt']) : null,
       updatedAt:
           map['updatedAt'] != null ? DateTime.parse(map['updatedAt']) : null,
+      pickupAddrFull: map['pickupAddrFull'] != null
+          ? map['pickupAddrFull'] as String
+          : null,
+      destAddrFull:
+          map['destAddrFull'] != null ? map['destAddrFull'] as String : null,
     );
   }
 
@@ -126,7 +138,7 @@ class BookingModel {
 
   @override
   String toString() {
-    return 'BookingModel(id: $id, phoneNumber: $phoneNumber, customerId: $customerId, driverId: $driverId, driver: $driver, vehicleType: $vehicleType, pickupAddr: $pickupAddr, destAddr: $destAddr, status: $status, price: $price, distance: $distance, inApp: $inApp, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'BookingModel(id: $id, phoneNumber: $phoneNumber, customerId: $customerId, driverId: $driverId, driver: $driver, vehicleType: $vehicleType, pickupAddr: $pickupAddr, destAddr: $destAddr, status: $status, price: $price, distance: $distance, inApp: $inApp, createdAt: $createdAt, updatedAt: $updatedAt, pickupAddrFull: $pickupAddrFull, destAddrFull: $destAddrFull)';
   }
 
   @override
@@ -146,7 +158,9 @@ class BookingModel {
         other.distance == distance &&
         other.inApp == inApp &&
         other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
+        other.updatedAt == updatedAt &&
+        other.pickupAddrFull == pickupAddrFull &&
+        other.destAddrFull == destAddrFull;
   }
 
   @override
@@ -164,6 +178,8 @@ class BookingModel {
         distance.hashCode ^
         inApp.hashCode ^
         createdAt.hashCode ^
-        updatedAt.hashCode;
+        updatedAt.hashCode ^
+        pickupAddrFull.hashCode ^
+        destAddrFull.hashCode;
   }
 }

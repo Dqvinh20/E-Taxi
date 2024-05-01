@@ -295,7 +295,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 ),
                                 onPressed: _onSignupPressed,
                                 style: ElevatedButton.styleFrom(
-                                    primary: primary,
+                                    backgroundColor: primary,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 40, vertical: 20),
                                     textStyle: TextStyle(

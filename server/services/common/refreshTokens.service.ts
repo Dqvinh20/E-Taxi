@@ -42,7 +42,7 @@ const AuthService: TokenServiceSchema = {
 	actions: {
 		verifyToken: {
 			rest: "",
-			restricted: ["customers", "drivers", "staffs"],
+			restricted: ["customers", "drivers", "staffs", "refreshTokens"],
 			params: {
 				refreshToken: { type: "string" },
 			},
@@ -72,7 +72,7 @@ const AuthService: TokenServiceSchema = {
 
 		generate: {
 			rest: "",
-			restricted: ["customers", "drivers", "staffs"],
+			restricted: ["customers", "drivers", "staffs", "refreshTokens"],
 			params: {
 				userId: [{ type: "objectID", ObjectID: MongoObjectId }, { type: "string" }],
 				ttl: { type: "number", default: 7 * 24 * 60 * 60 },
@@ -114,7 +114,7 @@ const AuthService: TokenServiceSchema = {
 		},
 
 		create: {
-			restricted: ["customers", "drivers", "staffs"],
+			restricted: ["customers", "drivers", "staffs", "refreshTokens"],
 			rest: "",
 			params: {
 				userId: [{ type: "objectID", ObjectID: MongoObjectId }, { type: "string" }],
@@ -126,7 +126,7 @@ const AuthService: TokenServiceSchema = {
 		},
 
 		update: {
-			restricted: ["customers", "drivers", "staffs"],
+			restricted: ["customers", "drivers", "staffs", "refreshTokens"],
 			rest: "",
 			params: {
 				token: { type: "string" },
@@ -134,7 +134,7 @@ const AuthService: TokenServiceSchema = {
 			},
 		},
 		remove: {
-			restricted: ["customers", "drivers", "staffs"],
+			restricted: ["customers", "drivers", "staffs", "refreshTokens"],
 			rest: "",
 		},
 

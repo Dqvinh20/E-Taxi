@@ -28,15 +28,16 @@ class ApiConstants {
   static int port = 3002;
 
   // Remote
-  static String remoteHost = "hausuper-s.me";
+  static String remoteHost = "api-driver.hausuper-s.me";
   static int remotePort = 4002;
 
   // Url
   static String baseUrl = isDev ? 'http://$host:$port/api/v1' : prodUrl;
-  static String prodUrl = 'http://$remoteHost:$remotePort/api/v1';
+  static String prodUrl = 'https://$remoteHost/api/v1';
 
-  static String socketUrl =
-      isDev ? 'http://$host:3003/drivers' : "http://$remoteHost:4003/drivers";
+  static String socketUrl = isDev
+      ? 'http://$host:3003/drivers'
+      : "https://socket.hausuper-s.me/drivers";
 }
 
 const topMarginInWelcomeScreen = 150.0;
