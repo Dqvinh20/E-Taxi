@@ -1,13 +1,7 @@
 name: Deploy to server
 
 on:
-  push:
-    branches:
-      - develop
-      - master
-    paths:
-      - ".github/workflows/Server CICD.yml"
-      - "server/**"
+  workflow_dispatch:
 
 
 env:
